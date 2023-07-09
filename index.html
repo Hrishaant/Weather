@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>Weather App</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap">
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Roboto', sans-serif;
+      background-color: #f1f6f9;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+    }
+
+    .container {
+      background-color: #e8f4f8;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+      padding: 40px;
+      border-radius: 8px;
+      text-align: center;
+      animation: fadeIn 1s ease-in-out;
+    }
+
+    .card-header {
+      margin-bottom: 30px;
+    }
+
+    h1 {
+      color: #333333;
+      font-size: 32px;
+      font-weight: 700;
+      margin: 0;
+    }
+
+    .card-body {
+      margin-bottom: 20px;
+    }
+
+    .temperature {
+      font-size: 72px;
+      font-weight: 500;
+      margin-bottom: 10px;
+      color: #333333;
+    }
+
+    .description {
+      font-size: 24px;
+      font-weight: 400;
+      margin-bottom: 20px;
+      color: #555555;
+    }
+
+    .icon {
+      font-size: 72px;
+      margin-bottom: 10px;
+      color: #555555;
+    }
+
+    .location {
+      font-size: 24px;
+      font-weight: 500;
+      color: #555555;
+      margin-bottom: 40px;
+    }
+
+    .error-message {
+      color: #FF0000;
+      font-weight: 500;
+      margin-bottom: 10px;
+    }
+
+    .form-container {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 20px;
+    }
+
+    .form-input {
+      width: 240px;
+      height: 40px;
+      font-size: 16px;
+      padding: 6px 10px;
+      border-radius: 4px;
+      border: 1px solid #cccccc;
+    }
+
+    .form-submit {
+      background-color: #4CAF50;
+      color: #ffffff;
+      border: none;
+      padding: 10px 20px;
+      font-size: 16px;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    @keyframes fadeIn {
+      0% {
+        opacity: 0;
+      }
+      100% {
+        opacity: 1;
+      }
+    }
+
+    @keyframes gradientBackground {
+      0% {
+        background-position: 0% 50%;
+      }
+      50% {
+        background-position: 100% 50%;
+      }
+      100% {
+        background-position: 0% 50%;
+      }
+    }
+
+    .container {
+      background: linear-gradient(-45deg, #81c3d7, #5f9ea0);
+      background-size: 400% 400%;
+      animation: gradientBackground 10s ease-in-out infinite;
+    }
+
+    .card-footer {
+      margin-top: 30px;
+    }
+
+    .additional-info {
+      font-size: 18px;
+      font-weight: 400;
+      color: #555555;
+      margin-bottom: 10px;
+    }
+
+    .sunrise-sunset {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .sunrise-sunset span {
+      margin: 0 10px;
+    }
+
+    .wind-speed {
+      margin-bottom: 10px;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <div class="card">
+      <div class="card-header">
+        <h1>Weather App</h1>
+      </div>
+      <div class="card-body">
+        <div class="weather-info">
+          <i class="icon">☀️</i>
+          <div class="temperature">Loading...</div>
+          <div class="description">Loading...</div>
+          <div class="location">Chennai, IN</div>
+        </div>
+        <div id="error-message" class="error-message"></div>
+      </div>
+      <div class="form-container">
+        <input id="location-input" class="form-input" type="text" placeholder="Enter location">
+        <button id="submit-btn" class="form-submit">Search</button>
+      </div>
+      <div class="card-footer">
+        <div class="additional-info">Additional Information</div>
+        <div class="sunrise-sunset">
+          <span>🌅 Sunrise: <span id="sunrise-time">Loading...</span></span>
+          <span>🌇 Sunset: <span id="sunset-time">Loading...</span></span>
+        </div>
+        <div class="wind-speed">💨 Wind Speed: <span id="wind-speed">Loading...</span> km/h</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    window.addEventListener('DOMContentLoaded', () => {
+      const temperatureElement = document.querySelector('.temperature');
+      const descriptionElement = document.querySelector('.description');
+      const locationElement = document.querySelector('.location');
+      const errorMessageElement = document.getElementById('error-message');
+      const sunriseTimeElement = document.getElementById('sunrise-time');
+      const sunsetTimeElement = document.getElementById('sunset-time');
+      const windSpeedElement = document.getElementById('wind-speed');
+      const locationInput = document.getElementById('location-input');
+      const submitBtn = document.getElementById('submit-btn');
+
+      // Enter your OpenWeatherMap API key here
+      const apiKey = '45e7554ab22c1b561452ae609d7cdab9';
+
+      function fetchWeatherData(location) {
+        const apiEndpoint = `https://api.openweathermap.org/data/2.5/weather?q=${location}&units=metric&appid=${apiKey}`;
+
+        fetch(apiEndpoint)
+          .then(response => response.json())
+          .then(data => {
+            const temperature = Math.round(data.main.temp);
+            const description = data.weather[0].description;
+            const cityName = data.name;
+            const countryName = data.sys.country;
+            const sunriseTimestamp = data.sys.sunrise * 1000;
+            const sunsetTimestamp = data.sys.sunset * 1000;
+            const windSpeed = data.wind.speed;
+
+            temperatureElement.textContent = `${temperature}°C`;
+            descriptionElement.textContent = description;
+            locationElement.textContent = `${cityName}, ${countryName}`;
+            sunriseTimeElement.textContent = new Date(sunriseTimestamp).toLocaleTimeString();
+            sunsetTimeElement.textContent = new Date(sunsetTimestamp).toLocaleTimeString();
+            windSpeedElement.textContent = windSpeed.toFixed(1);
+            document.querySelector('.weather-info').style.opacity = 1;
+            errorMessageElement.textContent = '';
+          })
+          .catch(error => {
+            console.error('Error:', error);
+            temperatureElement.textContent = 'Error fetching data';
+            descriptionElement.textContent = '';
+            locationElement.textContent = '';
+            sunriseTimeElement.textContent = 'Error';
+            sunsetTimeElement.textContent = 'Error';
+            windSpeedElement.textContent = 'Error';
+            document.querySelector('.weather-info').style.opacity = 0;
+            errorMessageElement.textContent = 'Failed to fetch weather data.';
+          });
+      }
+
+      function onSubmit() {
+        const location = locationInput.value.trim();
+        if (location !== '') {
+          fetchWeatherData(location);
+        } else {
+          errorMessageElement.textContent = 'Please enter a valid location.';
+        }
+      }
+
+      submitBtn.addEventListener('click', onSubmit);
+      locationInput.addEventListener('keydown', (event) => {
+        if (event.key === 'Enter') {
+          onSubmit();
+        }
+      });
+
+      // Fetch weather data for the default location on page load
+      fetchWeatherData('Chennai');
+    });
+  </script>
+</body>
+
+</html>
