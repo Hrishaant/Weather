@@ -10,11 +10,11 @@
     },
     {
       "src": "icon.png",
-      "sizes": "512x512",
+      "sizes": "‪C:\Users\Dell\Desktop\vincent_van_gogh_eating_a_samosa.jpg",
       "type": "image/png"
     }
   ],
-  "start_url": ".",
+  "start_url": "C:\Users\Dell\Pictures\vincent_van_gogh_eating_a_samosa small icon.jpg",
   "display": "standalone",
   "background_color": "#e8f4f8",
   "theme_color": "#5f9ea0"
